@@ -200,15 +200,15 @@ export default function UploadQualityFeedback({
             Stem Quality Breakdown ({result.stemAnalysis.stems.length} Stems)
           </h4>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {result.stemAnalysis.stems.map((stem) => (
+            {result.stemAnalysis.stems.map((stemItem) => (
               <div
-                key={stem.id}
+                key={stemItem.stem.id}
                 className="rounded-lg border border-border/40 p-2 text-xs bg-muted/20"
               >
-                <p className="font-semibold truncate">{stem.name}</p>
-                <p className="text-muted-foreground capitalize">{stem.role}</p>
+                <p className="font-semibold truncate">{stemItem.stem.name}</p>
+                <p className="text-muted-foreground capitalize">{stemItem.stem.role}</p>
                 <p className="text-primary font-bold mt-1">
-                  {stem.assessment ? `${stem.assessment.score}/100` : 'Error'}
+                  {stemItem.assessment ? `${stemItem.assessment.score}/100` : 'Error'}
                 </p>
               </div>
             ))}

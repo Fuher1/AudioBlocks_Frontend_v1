@@ -26,7 +26,11 @@ import {
   type SongQualityAssessment,
   type SongQualityOptions,
 } from './songQualityFilter';
-import { analyzeStemUpload, type StemUploadAnalysis, type AudioStem } from './stemAnalysis';
+import {
+  analyzeStemUpload,
+  type MultiTrackAnalysis,
+  type StemUpload,
+} from './stemAnalysis';
 
 export type PipelineVerdict = 'approved' | 'review' | 'rejected' | 'skipped';
 
@@ -40,7 +44,7 @@ export interface UploadQualityPipelineInput {
   audioBuffer?: ArrayBuffer | Uint8Array | string;
   audioHash?: string;
   spectralFeatures?: number[];
-  stems?: AudioStem[];
+  stems?: StemUpload[];
   subject?: QualityCheckSubject | null;
 }
 
@@ -63,7 +67,7 @@ export interface UploadQualityPipelineResult {
   exempt: boolean;
   plagiarismCheck?: PlagiarismCheckResult;
   assessment?: SongQualityAssessment;
-  stemAnalysis?: StemUploadAnalysis;
+  stemAnalysis?: MultiTrackAnalysis;
   reasons: string[];
   processedAt: number;
 }
