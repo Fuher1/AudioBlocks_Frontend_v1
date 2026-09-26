@@ -11,25 +11,22 @@
  * 6. Platform analytics logging (`lib/qualityAnalytics.ts`).
  */
 
-import { canSkipQualityCheck, type QualityCheckSubject } from './qualityChecks';
+import { AnalysisQueueMonitor } from './analysisQueueMonitor';
 import {
   checkPlagiarism,
   registerTrackFingerprint,
   generateAudioFingerprint,
   type PlagiarismCheckResult,
 } from './plagiarismDetection';
+import { recordQualityCheckResult } from './qualityAnalytics';
+import { canSkipQualityCheck, type QualityCheckSubject } from './qualityChecks';
+import { getGenreThreshold, evaluateQualityScoreAgainstGenre } from './qualityThresholds';
 import {
   analyzeSongQuality,
   type SongQualityAssessment,
   type SongQualityOptions,
 } from './songQualityFilter';
 import { analyzeStemUpload, type StemUploadAnalysis, type AudioStem } from './stemAnalysis';
-import {
-  getGenreThreshold,
-  evaluateQualityScoreAgainstGenre,
-} from './qualityThresholds';
-import { recordQualityCheckResult } from './qualityAnalytics';
-import { AnalysisQueueMonitor } from './analysisQueueMonitor';
 
 export type PipelineVerdict = 'approved' | 'review' | 'rejected' | 'skipped';
 
@@ -136,9 +133,7 @@ export async function processUploadQualityCheck(
         passedGenreThreshold: false,
         exempt: false,
         plagiarismCheck: plagiarismResult,
-        reasons: [
-          `Rejected by plagiarism detector: ${plagiarismResult.reasons.join(' ')}`,
-        ],
+        reasons: [`Rejected by plagiarism detector: ${plagiarismResult.reasons.join(' ')}`],
         processedAt,
       };
     }
@@ -162,7 +157,7 @@ export async function processUploadQualityCheck(
   let assessment: SongQualityAssessment | undefined;
   let stemAnalysis: StemUploadAnalysis | undefined;
   let rawScore = 0;
-  let reasons: string[] = [];
+  const reasons: string[] = [];
 
   try {
     if (input.stems && input.stems.length > 0) {
@@ -177,10 +172,10 @@ export async function processUploadQualityCheck(
         )
       );
 
-      rawScore = stemAnalysis.score;
-      if (stemAnalysis.verdict === 'rejected') {
+      rawScore = stemAnalysis.overall.score;
+      if (stemAnalysis.overall.verdict === 'rejected') {
         reasons.push('One or more stems failed acoustic quality inspection.');
-      } else if (stemAnalysis.verdict === 'review') {
+      } else if (stemAnalysis.overall.verdict === 'review') {
         reasons.push('Multi-track stem assessment flagged for manual review.');
       }
     } else {
@@ -247,11 +242,11 @@ export async function processUploadQualityCheck(
         `Quality score (${rawScore}/100) is borderline for ${genre} threshold (${Math.round(genreThreshold * 100)}/100).`
       );
     }
-  } else if (assessment?.verdict === 'rejected' || stemAnalysis?.verdict === 'rejected') {
+  } else if (assessment?.verdict === 'rejected' || stemAnalysis?.overall.verdict === 'rejected') {
     finalStatus = 'rejected';
   } else if (
     assessment?.verdict === 'review' ||
-    stemAnalysis?.verdict === 'review' ||
+    stemAnalysis?.overall.verdict === 'review' ||
     plagiarismResult?.verdict === 'suspicious'
   ) {
     finalStatus = 'review';
@@ -263,7 +258,8 @@ export async function processUploadQualityCheck(
   // 6. Record analytics & complete queue job
   recordQualityCheckResult({
     trackId: input.trackId,
-    outcome: finalStatus === 'approved' ? 'passed' : finalStatus === 'rejected' ? 'failed' : 'failed',
+    outcome:
+      finalStatus === 'approved' ? 'passed' : finalStatus === 'rejected' ? 'failed' : 'failed',
     score: rawScore / 100,
     recordedAt: processedAt,
   });

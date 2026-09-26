@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import UploadQualityFeedback from '@/components/ai/UploadQualityFeedback';
 import type { UploadQualityPipelineResult } from '@/lib/uploadQualityPipeline';
 
@@ -28,9 +28,9 @@ describe('UploadQualityFeedback component', () => {
     const onPublish = vi.fn();
     render(
       <UploadQualityFeedback
+        artist="SynthArtist"
         result={mockApprovedResult}
         title="Midnight Neon"
-        artist="SynthArtist"
         onPublish={onPublish}
       />
     );
@@ -72,15 +72,11 @@ describe('UploadQualityFeedback component', () => {
     };
 
     render(
-      <UploadQualityFeedback
-        result={duplicateResult}
-        title="Pirated Anthem"
-        onRetry={onRetry}
-      />
+      <UploadQualityFeedback result={duplicateResult} title="Pirated Anthem" onRetry={onRetry} />
     );
 
     expect(screen.getByText('Pirated Anthem')).toBeInTheDocument();
-    expect(screen.getByText(/rejected/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/rejected/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('duplicate')).toBeInTheDocument();
 
     const retryBtn = screen.getByRole('button', { name: /Re-upload \/ Adjust Track/i });

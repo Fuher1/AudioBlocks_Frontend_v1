@@ -203,7 +203,7 @@ export function getThresholdFeedback(genre?: string): ThresholdFeedback {
       recommendation = genre
         ? `Admins frequently approve "${genre}" tracks the filter rejects — lower minConfidenceScore.`
         : 'Admins frequently approve tracks the filter rejects — lower minConfidenceScore.';
-    } else {
+    } else if (rejectionReversals > approvalReversals) {
       suggestedMinConfidenceScore = roundToStep(Math.min(1, baseThreshold + THRESHOLD_STEP));
       recommendation = genre
         ? `Admins frequently reject "${genre}" tracks the filter approves — raise minConfidenceScore.`

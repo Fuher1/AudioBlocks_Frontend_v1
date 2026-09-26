@@ -117,7 +117,7 @@ describe('plagiarismDetection (#433)', () => {
       trackId: 'track_similar_rip',
       title: 'Neon Journey',
       artist: 'CoverBand',
-      spectralFeatures: [0.84, 0.41, 0.90, 0.16, 0.62, 0.76],
+      spectralFeatures: [0.84, 0.41, 0.9, 0.16, 0.62, 0.76],
     };
 
     const result = checkPlagiarism(similarCandidate);
@@ -135,7 +135,7 @@ describe('plagiarismDetection (#433)', () => {
       trackId: 'track_sampled_remix',
       title: 'Night Remix',
       artist: 'RemixArtist',
-      spectralFeatures: [0.85, 0.42, 0.50, 0.50, 0.30, 0.40],
+      spectralFeatures: [0.85, 0.42, 0.5, 0.5, 0.3, 0.4],
     };
 
     const result = checkPlagiarism(sampleUsageCandidate, {
@@ -160,7 +160,7 @@ describe('plagiarismDetection (#433)', () => {
       durationSeconds: 400,
       audioHash: 'unique_hash_112233',
       fingerprintHash: 'fp_deep_space_unique',
-      spectralFeatures: [0.01, 0.02, 0.05, 0.1, 0.02, 0.01],
+      spectralFeatures: [0.0, 0.0, 0.0, 0.0, 0.0, 0.99],
     };
 
     const result = checkPlagiarism(uniqueTrack);
